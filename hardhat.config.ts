@@ -1,13 +1,26 @@
 import * as dotenv from "dotenv";
+import fs from 'fs'
+import path from 'path'
 
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
+import '@nomiclabs/hardhat-ethers'
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 
 dotenv.config();
+
+const taskPaths = ["miscs"]
+taskPaths.forEach((folder) => {
+  const tasksPath = path.join(__dirname, 'tasks', folder)
+  fs.readdirSync(tasksPath)
+    .filter((_path) => _path.includes('.ts'))
+    .forEach((task) => {
+      require(`${tasksPath}/${task}`)
+    })
+})
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -37,6 +50,10 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
+  },
+  typechain: {
+    outDir: 'types',
+    target: 'ethers-v5',
   },
 };
 

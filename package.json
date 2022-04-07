@@ -1,5 +1,10 @@
 {
-  "name": "hardhat-project",
+  "name": "sandbox-contracts",
+  "scripts": {
+    "hardhat": "npx hardhat",
+    "codegen": "rm -rf libs/contracts/__generated__/ && typechain --target ethers-v5 --out-dir libs/contracts/__generated__/ 'abis/**/*.json'",
+    "postinstall": "yarn codegen"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
