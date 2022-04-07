@@ -30,9 +30,11 @@ const BWARE_LABS_KEY = process.env.BWARE_LABS_KEY || '' // if use BwareLabs for 
 const getAstarNetworkUrl = (networkName: string) =>
   BWARE_LABS_KEY
     ? `https://${networkName}-api.bwarelabs.com/${BWARE_LABS_KEY}`
-    : `https://rpc.${
-        networkName === 'astar' ? 'astar' : `${networkName}.astar`
-      }.network:8545`
+    : networkName === 'shiden'
+      ? `https://evm.shiden.astar.network`
+      : `https://rpc.${
+          networkName === 'astar' ? 'astar' : `${networkName}.astar`
+        }.network:8545`
 
 const INFURA_KEY = process.env.INFURA_KEY || '' // if use Infura, set this parameter
 const ALCHEMY_KEY = process.env.ALCHEMY_KEY || '' // if use Alchemy, set this parameter
