@@ -110,6 +110,7 @@
       "type": "constructor"
     },
     {
+      "gas": 148434,
       "inputs": [],
       "name": "update_mining_parameters",
       "outputs": [],
@@ -117,6 +118,7 @@
       "type": "function"
     },
     {
+      "gas": 149289,
       "inputs": [],
       "name": "start_epoch_time_write",
       "outputs": [
@@ -129,6 +131,7 @@
       "type": "function"
     },
     {
+      "gas": 149492,
       "inputs": [],
       "name": "future_epoch_time_write",
       "outputs": [
@@ -141,6 +144,7 @@
       "type": "function"
     },
     {
+      "gas": 4018,
       "inputs": [],
       "name": "available_supply",
       "outputs": [
@@ -153,6 +157,7 @@
       "type": "function"
     },
     {
+      "gas": 1902141,
       "inputs": [
         {
           "name": "start",
@@ -174,6 +179,7 @@
       "type": "function"
     },
     {
+      "gas": 38698,
       "inputs": [
         {
           "name": "_minter",
@@ -186,6 +192,7 @@
       "type": "function"
     },
     {
+      "gas": 37837,
       "inputs": [
         {
           "name": "_admin",
@@ -198,6 +205,7 @@
       "type": "function"
     },
     {
+      "gas": 1421,
       "inputs": [],
       "name": "totalSupply",
       "outputs": [
@@ -210,6 +218,7 @@
       "type": "function"
     },
     {
+      "gas": 1759,
       "inputs": [
         {
           "name": "_owner",
@@ -231,6 +240,7 @@
       "type": "function"
     },
     {
+      "gas": 75139,
       "inputs": [
         {
           "name": "_to",
@@ -252,6 +262,7 @@
       "type": "function"
     },
     {
+      "gas": 111433,
       "inputs": [
         {
           "name": "_from",
@@ -277,6 +288,7 @@
       "type": "function"
     },
     {
+      "gas": 39288,
       "inputs": [
         {
           "name": "_spender",
@@ -298,6 +310,7 @@
       "type": "function"
     },
     {
+      "gas": 227716,
       "inputs": [
         {
           "name": "_to",
@@ -319,6 +332,7 @@
       "type": "function"
     },
     {
+      "gas": 74999,
       "inputs": [
         {
           "name": "_value",
@@ -336,6 +350,7 @@
       "type": "function"
     },
     {
+      "gas": 178270,
       "inputs": [
         {
           "name": "_name",
@@ -352,6 +367,7 @@
       "type": "function"
     },
     {
+      "gas": 8063,
       "inputs": [],
       "name": "name",
       "outputs": [
@@ -364,6 +380,7 @@
       "type": "function"
     },
     {
+      "gas": 7116,
       "inputs": [],
       "name": "symbol",
       "outputs": [
@@ -376,6 +393,7 @@
       "type": "function"
     },
     {
+      "gas": 1721,
       "inputs": [],
       "name": "decimals",
       "outputs": [
@@ -388,6 +406,7 @@
       "type": "function"
     },
     {
+      "gas": 1905,
       "inputs": [
         {
           "name": "arg0",
@@ -405,6 +424,7 @@
       "type": "function"
     },
     {
+      "gas": 1781,
       "inputs": [],
       "name": "minter",
       "outputs": [
@@ -417,6 +437,7 @@
       "type": "function"
     },
     {
+      "gas": 1811,
       "inputs": [],
       "name": "admin",
       "outputs": [
@@ -429,6 +450,7 @@
       "type": "function"
     },
     {
+      "gas": 1841,
       "inputs": [],
       "name": "mining_epoch",
       "outputs": [
@@ -441,6 +463,7 @@
       "type": "function"
     },
     {
+      "gas": 1871,
       "inputs": [],
       "name": "start_epoch_time",
       "outputs": [
@@ -453,6 +476,7 @@
       "type": "function"
     },
     {
+      "gas": 1901,
       "inputs": [],
       "name": "rate",
       "outputs": [

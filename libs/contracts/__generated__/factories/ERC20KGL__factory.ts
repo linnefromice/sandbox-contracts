@@ -124,7 +124,6 @@ const _abi = [
     type: "constructor",
   },
   {
-    gas: 148434,
     inputs: [],
     name: "update_mining_parameters",
     outputs: [],
@@ -132,7 +131,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 149289,
     inputs: [],
     name: "start_epoch_time_write",
     outputs: [
@@ -145,7 +143,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 149492,
     inputs: [],
     name: "future_epoch_time_write",
     outputs: [
@@ -158,7 +155,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 4018,
     inputs: [],
     name: "available_supply",
     outputs: [
@@ -171,7 +167,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1902141,
     inputs: [
       {
         name: "start",
@@ -193,7 +188,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 38698,
     inputs: [
       {
         name: "_minter",
@@ -206,7 +200,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 37837,
     inputs: [
       {
         name: "_admin",
@@ -219,7 +212,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1421,
     inputs: [],
     name: "totalSupply",
     outputs: [
@@ -232,7 +224,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1759,
     inputs: [
       {
         name: "_owner",
@@ -254,7 +245,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 75139,
     inputs: [
       {
         name: "_to",
@@ -276,7 +266,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 111433,
     inputs: [
       {
         name: "_from",
@@ -302,7 +291,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 39288,
     inputs: [
       {
         name: "_spender",
@@ -324,7 +312,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 227716,
     inputs: [
       {
         name: "_to",
@@ -346,7 +333,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 74999,
     inputs: [
       {
         name: "_value",
@@ -364,7 +350,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 178270,
     inputs: [
       {
         name: "_name",
@@ -381,7 +366,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 8063,
     inputs: [],
     name: "name",
     outputs: [
@@ -394,7 +378,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 7116,
     inputs: [],
     name: "symbol",
     outputs: [
@@ -407,7 +390,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1721,
     inputs: [],
     name: "decimals",
     outputs: [
@@ -420,7 +402,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1905,
     inputs: [
       {
         name: "arg0",
@@ -438,7 +419,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1781,
     inputs: [],
     name: "minter",
     outputs: [
@@ -451,7 +431,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1811,
     inputs: [],
     name: "admin",
     outputs: [
@@ -464,7 +443,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1841,
     inputs: [],
     name: "mining_epoch",
     outputs: [
@@ -477,7 +455,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1871,
     inputs: [],
     name: "start_epoch_time",
     outputs: [
@@ -490,7 +467,6 @@ const _abi = [
     type: "function",
   },
   {
-    gas: 1901,
     inputs: [],
     name: "rate",
     outputs: [
