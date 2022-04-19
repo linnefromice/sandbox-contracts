@@ -10,7 +10,9 @@ const addresses = {
     KGL: "0x047Aba0887db6Cde209fBa6f4F306e53B4F292Fd",
     "3Kgl": "0xA8c822C4e7b8dD6cD4258873185bCf20239F9303",
     DAI: "0x6179d4c292c21FfFcE9A9fcE3825AF3E71Dd5a6D",
-    WETH: "0x95b8e46A64AF642B15eAf90641dE4E254730f500"
+    WETH: "0x95b8e46A64AF642B15eAf90641dE4E254730f500",
+    MUUU: "0xac0C9E9b1A3514E166B996baCFfAdF63F8a6bfC2",
+    muKGL: "0x18E1642D9fE65a5e478426EE1737201229370ee3",
   }
 }
 
@@ -45,4 +47,6 @@ task("kovan:tokens", "kovan:tokens").setAction(async ({}, hre: HardhatRuntimeEnv
   console.log(await getTokenInfo(hre, addresses.tokens["3Kgl"]))
   console.log(await getTokenInfo(hre, addresses.tokens.DAI))
   console.log(await getTokenInfo(hre, addresses.tokens.WETH))
+  console.log(await getTokenInfo(hre, addresses.tokens.MUUU))
+  console.log(await getTokenInfo(hre, addresses.tokens.muKGL))
 })
