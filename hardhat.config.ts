@@ -13,7 +13,7 @@ import { NetworkUserConfig } from "hardhat/types";
 
 dotenv.config();
 
-const taskPaths = ["miscs", "samples"]
+const taskPaths = ["miscs", "forkeds", "samples"]
 taskPaths.forEach((folder) => {
   const tasksPath = path.join(__dirname, 'tasks', folder)
   fs.readdirSync(tasksPath)
@@ -68,17 +68,30 @@ const getCommonNetworkConfig = ({
     : getEthereumNetworkUrl(networkName),
   chainId: chainId,
   gasPrice: gasPrices[networkName],
-  // accounts: {
-  //   mnemonic: MNEMONIC,
-  //   path: "m/44'/60'/0'/0",
-  //   initialIndex: 0,
-  //   count: 20,
-  // },
+  accounts: {
+    mnemonic: MNEMONIC,
+    path: "m/44'/60'/0'/0",
+    initialIndex: 0,
+    count: 20,
+  },
 })
 
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
+    hardhat: {
+      throwOnTransactionFailures: true,
+      throwOnCallFailures: true,
+      allowUnlimitedContractSize: true,
+      gasPrice: 65 * GWEI,
+      // for fork
+      chainId: 42,
+      forking: {
+        url: "https://eth-kovan.alchemyapi.io/v2/6NfGhbjipx7DqifRPBAKBZFGzcXeZ7LD",
+        blockNumber: 31110000,
+        enabled: true
+      }
+    },
     rinkeby: getCommonNetworkConfig({
       networkName: 'rinkeby',
       chainId: 4,
