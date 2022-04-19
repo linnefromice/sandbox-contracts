@@ -2,7 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ERC20KGL } from "./ERC20KGL";
+export type { Registry } from "./Registry";
 export type { VotingEscrow } from "./VotingEscrow";
+export type { ERC20 } from "./ERC20";
 
 export { ERC20KGL__factory } from "./factories/ERC20KGL__factory";
+export { Registry__factory } from "./factories/Registry__factory";
 export { VotingEscrow__factory } from "./factories/VotingEscrow__factory";
+export { ERC20__factory } from "./factories/ERC20__factory";
