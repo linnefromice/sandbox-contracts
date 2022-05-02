@@ -70,6 +70,10 @@ task("multicall", "multicall").setAction(async ({}, hre: HardhatRuntimeEnvironme
   }
 })
 
+/**
+ * use multicall by ethersjs & typechain
+ * - support only mainnet
+ */
 task("multicall-with-typechain", "multicall-with-typechain").setAction(async ({}, hre: HardhatRuntimeEnvironment) => {
   const { ethers } = hre
   const multicall = Multicall__factory.connect(
