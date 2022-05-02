@@ -3,6 +3,7 @@ import { task } from "hardhat/config"
 import { HardhatRuntimeEnvironment } from "hardhat/types"
 import jsonfile from "jsonfile"
 import { BigNumber } from "ethers"
+import { ERC20__factory, Multicall__factory } from "../../libs/contracts/__generated__"
 
 const multicall_abi = jsonfile.readFileSync("./abis/Multicall.json")
 
@@ -38,7 +39,7 @@ task("multicall", "multicall").setAction(async ({}, hre: HardhatRuntimeEnvironme
       callData: `0x${selector}${param}`
     },
     {
-      target: "0x6b175474e89094c44da98b954eedeac495271d0f", // USDT
+      target: "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
       callData: `0x${selector}${param}`
     },
   ]
@@ -49,4 +50,32 @@ task("multicall", "multicall").setAction(async ({}, hre: HardhatRuntimeEnvironme
   console.log(ethers.utils.formatUnits(BigNumber.from(result[1][0]), 6))
   console.log(ethers.utils.formatUnits(BigNumber.from(result[1][1]), 6))
   console.log(ethers.utils.formatUnits(BigNumber.from(result[1][2])))
+})
+
+task("multicall-with-typechain", "multicall-with-typechain").setAction(async ({}, hre: HardhatRuntimeEnvironment) => {
+  const { ethers } = hre
+  const multicall = Multicall__factory.connect(
+    "0xeefba1e63905ef1d7acba5a8513c70307c1ce441",
+    ethers.provider
+  )
+  const address = "0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7" // Curve.fi: DAI/USDC/USDT Pool
+  const _interface = ERC20__factory.createInterface()
+  const callData = [
+    {
+      target: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC
+      callData: _interface.encodeFunctionData("balanceOf", [address])
+    },
+    {
+      target: "0xdac17f958d2ee523a2206206994597c13d831ec7", // USDT
+      callData: _interface.encodeFunctionData("balanceOf", [address])
+    },
+    {
+      target: "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
+      callData: _interface.encodeFunctionData("balanceOf", [address])
+    },
+  ]
+  const result = await multicall.callStatic.aggregate(callData)
+  console.log(ethers.utils.formatUnits(_interface.decodeFunctionResult("balanceOf", result.returnData[0])[0], 6))
+  console.log(ethers.utils.formatUnits(_interface.decodeFunctionResult("balanceOf", result.returnData[1])[0], 6))
+  console.log(ethers.utils.formatUnits(_interface.decodeFunctionResult("balanceOf", result.returnData[2])[0]))
 })
