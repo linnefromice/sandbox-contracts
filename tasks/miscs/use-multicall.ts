@@ -7,6 +7,22 @@ import { ERC20__factory, Multicall__factory } from "../../libs/contracts/__gener
 
 const multicall_abi = jsonfile.readFileSync("./abis/Multicall.json")
 
+const MULTICALL_ADDRESS = "0xeefba1e63905ef1d7acba5a8513c70307c1ce441"
+const TOKENS = {
+  USDC: {
+    address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    decimals: 6
+  },
+  USDT: {
+    address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    decimals: 6
+  },
+  DAI: {
+    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
+    decimals: 18
+  }
+}
+
 /**
  * use multicall by only ethersjs
  * - support only mainnet
@@ -15,7 +31,7 @@ task("multicall", "multicall").setAction(async ({}, hre: HardhatRuntimeEnvironme
   const { ethers } = hre
 
   const multicall = new ethers.Contract(
-    "0xeefba1e63905ef1d7acba5a8513c70307c1ce441",
+    MULTICALL_ADDRESS,
     new ethers.utils.Interface(multicall_abi),
     ethers.provider
   )
@@ -31,25 +47,27 @@ task("multicall", "multicall").setAction(async ({}, hre: HardhatRuntimeEnvironme
 
   const inputs = [
     {
-      target: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC
+      target: TOKENS.USDC.address, // USDC
       callData: `0x${selector}${param}`
     },
     {
-      target: "0xdac17f958d2ee523a2206206994597c13d831ec7", // USDT
+      target: TOKENS.USDT.address, // USDT
       callData: `0x${selector}${param}`
     },
     {
-      target: "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
+      target: TOKENS.DAI.address, // DAI
       callData: `0x${selector}${param}`
     },
   ]
   const result = await multicall.callStatic.aggregate(inputs);
-  console.log(result[1][0])
-  console.log(result[1][1])
-  console.log(result[1][2])
-  console.log(ethers.utils.formatUnits(BigNumber.from(result[1][0]), 6))
-  console.log(ethers.utils.formatUnits(BigNumber.from(result[1][1]), 6))
-  console.log(ethers.utils.formatUnits(BigNumber.from(result[1][2])))
+  for (const [index, key] of Object.keys(TOKENS).entries()) {
+    console.log(
+      ethers.utils.formatUnits(
+        BigNumber.from(result[1][index]),
+        TOKENS[key as keyof typeof TOKENS].decimals
+      )
+    )
+  }
 })
 
 task("multicall-with-typechain", "multicall-with-typechain").setAction(async ({}, hre: HardhatRuntimeEnvironment) => {
@@ -62,20 +80,27 @@ task("multicall-with-typechain", "multicall-with-typechain").setAction(async ({}
   const _interface = ERC20__factory.createInterface()
   const callData = [
     {
-      target: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC
+      target: TOKENS.USDC.address, // USDC
       callData: _interface.encodeFunctionData("balanceOf", [address])
     },
     {
-      target: "0xdac17f958d2ee523a2206206994597c13d831ec7", // USDT
+      target: TOKENS.USDT.address, // USDT
       callData: _interface.encodeFunctionData("balanceOf", [address])
     },
     {
-      target: "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
+      target: TOKENS.DAI.address, // DAI
       callData: _interface.encodeFunctionData("balanceOf", [address])
     },
   ]
   const result = await multicall.callStatic.aggregate(callData)
-  console.log(ethers.utils.formatUnits(_interface.decodeFunctionResult("balanceOf", result.returnData[0])[0], 6))
-  console.log(ethers.utils.formatUnits(_interface.decodeFunctionResult("balanceOf", result.returnData[1])[0], 6))
-  console.log(ethers.utils.formatUnits(_interface.decodeFunctionResult("balanceOf", result.returnData[2])[0]))
+  for (const [index, key] of Object.keys(TOKENS).entries()) {
+    console.log(
+      ethers.utils.formatUnits(
+        _interface.decodeFunctionResult(
+          "balanceOf",
+          result.returnData[index]
+        )[0],
+      TOKENS[key as keyof typeof TOKENS].decimals)
+    )
+  }
 })
