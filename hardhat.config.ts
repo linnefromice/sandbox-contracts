@@ -112,6 +112,10 @@ const config: HardhatUserConfig = {
       networkName: 'shibuya',
       chainId: 81,
     }),
+    mainnet: getCommonNetworkConfig({
+      networkName: "mainnet",
+      chainId: 1
+    })
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
