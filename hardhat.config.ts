@@ -85,12 +85,12 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       gasPrice: 65 * GWEI,
       // for fork
-      chainId: 42,
-      forking: {
-        url: "https://eth-kovan.alchemyapi.io/v2/6NfGhbjipx7DqifRPBAKBZFGzcXeZ7LD",
-        blockNumber: 31110000,
-        enabled: true
-      }
+      // chainId: 42,
+      // forking: {
+      //   url: "https://eth-kovan.alchemyapi.io/v2/6NfGhbjipx7DqifRPBAKBZFGzcXeZ7LD",
+      //   blockNumber: 31110000,
+      //   enabled: true
+      // }
     },
     rinkeby: getCommonNetworkConfig({
       networkName: 'rinkeby',
