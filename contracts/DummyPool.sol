@@ -29,6 +29,7 @@ contract DummyPool {
   function claimTwo() external {
     uint256 _balance = balances[msg.sender];
     balances[msg.sender] = 0;
+    // token.approve(msg.sender, 0);
     token.approve(msg.sender, _balance);
     token.transferFrom(address(this), msg.sender, _balance);
   }

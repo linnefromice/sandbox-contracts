@@ -12,13 +12,14 @@ describe("DummyPool", () => {
     await tx.wait()
   }
 
-  it(".deposit", async () => {
+  it(".deposit -> .claim", async () => {
     const [deployer, user] = await ethers.getSigners()
     const { token, pool } = await setup(deployer)
     await mint(token, user, 1)
     let tx: ContractTransaction
 
     expect((await token.balanceOf(user.address)).toNumber()).to.eq(1)
+    expect((await token.balanceOf(pool.address)).toNumber()).to.eq(0)
     expect((await pool.balances(user.address)).toNumber()).to.eq(0)
 
     tx = await token.connect(user).approve(pool.address, 1)
@@ -27,6 +28,41 @@ describe("DummyPool", () => {
     await tx.wait()
 
     expect((await token.balanceOf(user.address)).toNumber()).to.eq(0)
+    expect((await token.balanceOf(pool.address)).toNumber()).to.eq(1)
     expect((await pool.balances(user.address)).toNumber()).to.eq(1)
+
+    tx = await pool.connect(user).claim()
+    await tx.wait()
+
+    expect((await token.balanceOf(user.address)).toNumber()).to.eq(1)
+    expect((await token.balanceOf(pool.address)).toNumber()).to.eq(0)
+    expect((await pool.balances(user.address)).toNumber()).to.eq(0)
+  })
+
+  it(".deposit -> .claimTwo", async () => {
+    const [deployer, user] = await ethers.getSigners()
+    const { token, pool } = await setup(deployer)
+    await mint(token, user, 1)
+    let tx: ContractTransaction
+
+    expect((await token.balanceOf(user.address)).toNumber()).to.eq(1)
+    expect((await token.balanceOf(pool.address)).toNumber()).to.eq(0)
+    expect((await pool.balances(user.address)).toNumber()).to.eq(0)
+
+    tx = await token.connect(user).approve(pool.address, 1)
+    await tx.wait()
+    tx = await pool.connect(user).deposit(1)
+    await tx.wait()
+
+    expect((await token.balanceOf(user.address)).toNumber()).to.eq(0)
+    expect((await token.balanceOf(pool.address)).toNumber()).to.eq(1)
+    expect((await pool.balances(user.address)).toNumber()).to.eq(1)
+
+    tx = await pool.connect(user).claimTwo()
+    await tx.wait()
+
+    expect((await token.balanceOf(user.address)).toNumber()).to.eq(1)
+    expect((await token.balanceOf(pool.address)).toNumber()).to.eq(0)
+    expect((await pool.balances(user.address)).toNumber()).to.eq(0)
   })
 })
