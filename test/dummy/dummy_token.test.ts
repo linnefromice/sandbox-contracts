@@ -1,19 +1,11 @@
 import { ethers } from "hardhat"
-import { DummyToken__factory } from "../../types"
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { expect } from "chai"
 import { ContractTransaction } from "ethers"
+import { setupToken } from "./utils"
 
 describe("DummyToken", () => {
-  const setup = async (deployer?: SignerWithAddress) => {
-    const _signer = deployer ?? (await ethers.getSigners())[0]
-    const token = await new DummyToken__factory(_signer).deploy()
-    await token.deployTransaction.wait()
-    return { token }
-  }
-
   it("name, symbol, decimals", async () => {
-    const { token } = await setup()
+    const { token } = await setupToken()
     const [name, symbol, decimals, totalSupply] = await Promise.all([
       token.name(),
       token.symbol(),
@@ -28,7 +20,7 @@ describe("DummyToken", () => {
 
   it(".mint", async () => {
     const [deployer, user] = await ethers.getSigners()
-    const { token } = await setup(deployer)
+    const { token } = await setupToken(deployer)
     let tx: ContractTransaction
     const before_balance = await token.balanceOf(user.address)
     expect(before_balance.toString()).to.eq("0")
