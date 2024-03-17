@@ -87,7 +87,7 @@ const config: HardhatUserConfig = {
       // for fork
       // chainId: 42,
       // forking: {
-      //   url: "https://eth-kovan.alchemyapi.io/v2/6NfGhbjipx7DqifRPBAKBZFGzcXeZ7LD",
+      //   url: "https://eth-kovan.alchemyapi.io/v2/${ALCEHMY_KEY}",
       //   blockNumber: 31110000,
       //   enabled: true
       // }
