@@ -27,7 +27,7 @@ describe("ICORepresentative", function () {
 
   describe("Deploy", function () {
     it("test", async function () {
-      const { contract } = await loadFixture(deployWithFixture);
+      const { contract, owner } = await loadFixture(deployWithFixture);
 
       const [name, symbol, decimals] = await Promise.all([
         contract.read.name(),
@@ -37,6 +37,14 @@ describe("ICORepresentative", function () {
       expect(name).to.equal("ICORepresentative");
       expect(symbol).to.equal("ICO-R");
       expect(decimals).to.equal(18);
+
+      const _totalSupply = 2_000_000_000n * 10n ** 18n;
+      const totalSupply = await contract.read.totalSupply();
+      // console.log(totalSupply.toString());
+      expect(totalSupply.toString()).to.equal(_totalSupply.toString());
+      const balance = await contract.read.balanceOf([owner.account.address]);
+      // console.log(balance.toString());
+      expect(balance.toString()).to.equal(_totalSupply.toString());
     });
   });
 });
