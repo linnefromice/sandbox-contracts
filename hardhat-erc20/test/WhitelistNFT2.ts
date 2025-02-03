@@ -46,20 +46,27 @@ describe("WhitelistNFT2", function () {
 
   it("initialize", async function () {
     const { contract } = await loadFixture(deployWithFixture);
-    const [name, symbol, revealedBaseURI, hiddenURI, isRevealed] =
-      await Promise.all([
-        contract.read.name(),
-        contract.read.symbol(),
-        contract.read.revealedBaseURI(),
-        contract.read.hiddenURI(),
-        contract.read.isRevealed(),
-      ]);
+    const [
+      name,
+      symbol,
+      revealedBaseURI,
+      hiddenURI,
+      isRevealed,
+      isMintExpired,
+    ] = await Promise.all([
+      contract.read.name(),
+      contract.read.symbol(),
+      contract.read.revealedBaseURI(),
+      contract.read.hiddenURI(),
+      contract.read.isRevealed(),
+      contract.read.isMintExpired(),
+    ]);
     expect(name).to.equal("Whitelist NFT 2");
     expect(symbol).to.equal("WHITELIST-NFT-2");
     expect(revealedBaseURI).to.equal(BASE_URI);
     expect(hiddenURI).to.equal(HIDDEN_URI);
     expect(isRevealed).to.equal(false);
-
+    expect(isMintExpired).to.equal(false);
     const tokenUrlWhenNotRevealed = await contract.read.tokenURI([0n]);
     expect(tokenUrlWhenNotRevealed).to.equal(HIDDEN_URI);
   });
@@ -155,6 +162,31 @@ describe("WhitelistNFT2", function () {
       await contract.write.mint([1n], { account: other1.account });
       expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(
         other1.account.address.toLowerCase()
+      );
+    });
+
+    it("about expireMintAction", async function () {
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1] = otherAccounts;
+
+      await contract.write.addTokenWithReceiver(
+        [{ tokenId: 1n, uri: "1.json", user: other1.account.address }],
+        { account: owner.account }
+      );
+      await contract.write.addTokenWithReceiver(
+        [{ tokenId: 2n, uri: "2.json", user: other1.account.address }],
+        { account: owner.account }
+      );
+      // before expireMintAction
+      await contract.write.mint([1n], { account: other1.account });
+      await contract.write.expireMintAction({ account: owner.account });
+      expect(await contract.read.isMintExpired()).to.equal(true);
+      // after expireMintAction
+      await expectRevert(
+        () => contract.write.mint([2n], { account: other1.account }),
+        "MintExpired"
       );
     });
   });
@@ -309,6 +341,23 @@ describe("WhitelistNFT2", function () {
       // by owner
       await contract.write.reveal({ account: owner.account });
       expect(await contract.read.isRevealed()).to.equal(true);
+    });
+
+    it("expireMintAction", async function () {
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1] = otherAccounts;
+
+      // by not owner
+      await expectRevert(
+        () => contract.write.expireMintAction({ account: other1.account }),
+        "OwnableUnauthorizedAccount"
+      );
+
+      // by owner
+      await contract.write.expireMintAction({ account: owner.account });
+      expect(await contract.read.isMintExpired()).to.equal(true);
     });
 
     it("mintByOwner", async function () {

@@ -10,6 +10,7 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
     error NotWhitelisted(uint256 tokenId);
     error NotReceiver();
     error AlreadyMinted();
+    error MintExpired();
 
     uint256[] public tokenIdList;
     mapping(uint256 => address) public whitelistList;
@@ -18,9 +19,7 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
     bool public isRevealed = false;
     string public hiddenURI;
     string public revealedBaseURI;
-
-    // TODO: add expiration
-    // bool public isExpired = false;
+    bool public isMintExpired = false;
 
     constructor(
         string memory _name,
@@ -39,6 +38,9 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
         }
         if (receiver != msg.sender) {
             revert NotReceiver();
+        }
+        if (isMintExpired) {
+            revert MintExpired();
         }
         _executeMint(receiver, tokenId);
     }
@@ -104,6 +106,9 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
     function reveal() public onlyOwner {
         _setIsRevealed(true);
     }
+    function expireMintAction() public onlyOwner {
+        _setIsMintExpired(true);
+    }
 
     function _addToken(uint256 tokenId, string memory uri) internal {
         _setTokenURI(tokenId, uri);
@@ -119,5 +124,8 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
     }
     function _setIsRevealed(bool _isRevealed) internal {
         isRevealed = _isRevealed;
+    }
+    function _setIsMintExpired(bool _isMintExpired) internal {
+        isMintExpired = _isMintExpired;
     }
 }
