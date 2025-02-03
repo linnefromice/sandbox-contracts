@@ -62,4 +62,11 @@ contract WhitelistNFTDebug is WhitelistNFT2 {
     function unrevealByAnyone() public {
         _setIsRevealed(false);
     }
+
+    function expireMintActionByAnyone() public {
+        _setIsMintExpired(true);
+    }
+    function unexpireMintActionByAnyone() public {
+        _setIsMintExpired(false);
+    }
 }
