@@ -3,13 +3,15 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
-    "hardhat": "^2.22.18"
+    "hardhat": "^2.22.18",
+    "dotenv": "^16.4.5"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.2.0"
   },
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "deploy:nft-debug:sepolia": "hardhat ignition deploy ./ignition/modules/WhitelistNFTDebug.ts --network sepolia --verify"
   }
 }

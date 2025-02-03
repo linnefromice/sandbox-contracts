@@ -5,6 +5,8 @@ pragma solidity ^0.8.28;
 import "./WhitelistNFT2.sol";
 
 contract WhitelistNFTDebug is WhitelistNFT2 {
+    error NoMintableToken();
+
     constructor()
         WhitelistNFT2(
             "Whitelist NFT Debug",
@@ -34,6 +36,21 @@ contract WhitelistNFTDebug is WhitelistNFT2 {
     }
 
     // Debug functions
+    function mintAuto() public {
+        for (uint256 i = 0; i < tokenIdList.length; i++) {
+            uint256 tokenId = tokenIdList[i];
+            address receiver = whitelistList[tokenId];
+            if (receiver == msg.sender) {
+                if (_ownerOf(tokenId) != address(0)) {
+                    continue;
+                }
+                mint(tokenId);
+                return;
+            }
+        }
+        revert NoMintableToken();
+    }
+
     function getTokenIdList() public view override returns (uint256[] memory) {
         return tokenIdList;
     }

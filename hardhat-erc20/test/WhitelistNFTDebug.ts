@@ -74,6 +74,60 @@ describe("WhitelistNFTDebug", function () {
     );
   });
 
+  it("mintAuto", async function () {
+    const { contract, owner, otherAccounts } = await loadFixture(
+      deployWithFixture
+    );
+    const [other] = otherAccounts;
+
+    await contract.write.addTokenWithReceiverByAnyone(
+      [
+        {
+          tokenId: 21n,
+          uri: "21.json",
+          user: other.account.address,
+        },
+      ],
+      {
+        account: owner.account,
+      }
+    );
+    await contract.write.addTokenWithReceiverByAnyone(
+      [
+        {
+          tokenId: 31n,
+          uri: "31.json",
+          user: other.account.address,
+        },
+      ],
+      {
+        account: owner.account,
+      }
+    );
+
+    await contract.write.mintAuto({
+      account: other.account,
+    });
+    expect((await contract.read.ownerOf([21n])).toLowerCase()).to.equal(
+      other.account.address.toLowerCase()
+    );
+    await expectRevert(
+      () => contract.read.ownerOf([31n]),
+      "ERC721NonexistentToken"
+    );
+    await contract.write.mintAuto({
+      account: other.account,
+    });
+    expect((await contract.read.ownerOf([31n])).toLowerCase()).to.equal(
+      other.account.address.toLowerCase()
+    );
+
+    await expectRevert(
+      () => contract.write.mintAuto({ account: other.account }),
+      "NoMintableToken"
+    );
+  });
+
   it("addTokenByAnyone", async function () {
     const { contract, otherAccounts } = await loadFixture(deployWithFixture);
     const [otherOne, otherTwo] = otherAccounts;
