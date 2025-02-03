@@ -1,19 +1,15 @@
-import {
-  time,
-  loadFixture,
-} from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
+import "@nomicfoundation/hardhat-chai-matchers";
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
 import { zeroAddress } from "viem";
-import { ethers } from "ethers";
-import "@nomicfoundation/hardhat-chai-matchers";
 // import abi from "../artifacts/contracts/nfts/WhitelistNFT2.sol/WhitelistNFT2.json";
 // const CONTRACT_INTERFACE = new ethers.Interface(abi["abi"]);
 
 const BASE_URI = "https://example.com/metadata/";
 const HIDDEN_URI = BASE_URI + "hidden.json";
 
-const expectRevert = async(
+const expectRevert = async (
   fn: () => Promise<any>,
   expectedErrorMessage: string
 ) => {
@@ -23,7 +19,7 @@ const expectRevert = async(
   } catch (error: any) {
     expect(error.details).to.include(expectedErrorMessage);
   }
-}
+};
 
 describe("WhitelistNFT2", function () {
   async function deployWithFixture() {
@@ -32,10 +28,7 @@ describe("WhitelistNFT2", function () {
 
     const contract = await hre.viem.deployContract(
       "WhitelistNFT2",
-      [
-        BASE_URI,
-        HIDDEN_URI
-      ],
+      [BASE_URI, HIDDEN_URI],
       {
         // value: lockedAmount,
       }
@@ -53,19 +46,14 @@ describe("WhitelistNFT2", function () {
 
   it("initialize", async function () {
     const { contract } = await loadFixture(deployWithFixture);
-    const [
-      name,
-      symbol,
-      revealedBaseURI,
-      hiddenURI,
-      isRevealed
-    ] = await Promise.all([
-      contract.read.name(),
-      contract.read.symbol(),
-      contract.read.revealedBaseURI(),
-      contract.read.hiddenURI(),
-      contract.read.isRevealed()
-    ]);
+    const [name, symbol, revealedBaseURI, hiddenURI, isRevealed] =
+      await Promise.all([
+        contract.read.name(),
+        contract.read.symbol(),
+        contract.read.revealedBaseURI(),
+        contract.read.hiddenURI(),
+        contract.read.isRevealed(),
+      ]);
     expect(name).to.equal("WhitelistNFT2");
     expect(symbol).to.equal("WHITELIST-NFT-2");
     expect(revealedBaseURI).to.equal(BASE_URI);
@@ -78,73 +66,98 @@ describe("WhitelistNFT2", function () {
 
   describe("mint", () => {
     it("scenario", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [other1, other2] = otherAccounts
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1, other2] = otherAccounts;
 
       // add token
-      await contract.write.addToken([1n, "1.json"], { account: owner.account })
-      await contract.write.addToken([2n, "2.json"], { account: owner.account })
-      await contract.write.addWhitelist([other1.account.address, 1n], { account: owner.account })
-      await contract.write.addWhitelist([other2.account.address, 2n], { account: owner.account })
+      await contract.write.addToken([1n, "1.json"], { account: owner.account });
+      await contract.write.addToken([2n, "2.json"], { account: owner.account });
+      await contract.write.addWhitelist([other1.account.address, 1n], {
+        account: owner.account,
+      });
+      await contract.write.addWhitelist([other2.account.address, 2n], {
+        account: owner.account,
+      });
 
       // mint
-      await contract.write.mint([1n], { account: other1.account })
-      await contract.write.mint([2n], { account: other2.account })
-      expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(other1.account.address.toLowerCase());
-      expect((await contract.read.ownerOf([2n])).toLowerCase()).to.equal(other2.account.address.toLowerCase());
+      await contract.write.mint([1n], { account: other1.account });
+      await contract.write.mint([2n], { account: other2.account });
+      expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(
+        other1.account.address.toLowerCase()
+      );
+      expect((await contract.read.ownerOf([2n])).toLowerCase()).to.equal(
+        other2.account.address.toLowerCase()
+      );
 
       expect(await contract.read.tokenURI([1n])).to.equal(HIDDEN_URI);
       expect(await contract.read.tokenURI([2n])).to.equal(HIDDEN_URI);
-      await contract.write.reveal()
+      await contract.write.reveal();
       expect(await contract.read.tokenURI([1n])).to.equal(BASE_URI + "1.json");
       expect(await contract.read.tokenURI([2n])).to.equal(BASE_URI + "2.json");
-    })
+    });
 
     it("about mint", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [other1, other2] = otherAccounts
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1, other2] = otherAccounts;
 
-      await contract.write.addToken([1n, "1.json"], { account: owner.account })
-      await contract.write.addWhitelist([other1.account.address, 1n], { account: owner.account })
-      await contract.write.mint([1n], { account: other1.account })
+      await contract.write.addToken([1n, "1.json"], { account: owner.account });
+      await contract.write.addWhitelist([other1.account.address, 1n], {
+        account: owner.account,
+      });
+      await contract.write.mint([1n], { account: other1.account });
 
       await expectRevert(
         () => contract.write.mint([1n], { account: other1.account }),
         "AlreadyMinted"
-      )
-    })
+      );
+    });
 
     it("about addToken", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [other1] = otherAccounts
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1] = otherAccounts;
 
       await expectRevert(
-        () => contract.write.mintByOwner([other1.account.address, 1n], { account: owner.account }),
+        () =>
+          contract.write.mintByOwner([other1.account.address, 1n], {
+            account: owner.account,
+          }),
         "NotInitializedToken"
-      )
-    })
+      );
+    });
 
     it("about whitelist", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [other1, other2] = otherAccounts
-      await contract.write.addToken([1n, "1.json"], { account: owner.account })
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1, other2] = otherAccounts;
+      await contract.write.addToken([1n, "1.json"], { account: owner.account });
 
       // not whitelisted
       await expectRevert(
         () => contract.write.mint([1n], { account: other1.account }),
         "NotWhitelisted"
-      )
+      );
       // whitelisted, but not receiver
-      await contract.write.addWhitelist([other1.account.address, 1n], { account: owner.account })
+      await contract.write.addWhitelist([other1.account.address, 1n], {
+        account: owner.account,
+      });
       await expectRevert(
         () => contract.write.mint([1n], { account: other2.account }),
         "NotReceiver"
-      )
+      );
 
-      await contract.write.mint([1n], { account: other1.account })
-      expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(other1.account.address.toLowerCase());
-    })
-  })
+      await contract.write.mint([1n], { account: other1.account });
+      expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(
+        other1.account.address.toLowerCase()
+      );
+    });
+  });
 
   describe("manage-token", function () {
     it("scenario", async function () {
@@ -158,11 +171,18 @@ describe("WhitelistNFT2", function () {
       expect(await contract.read.getTokenIdList()).to.deep.equal([tokenId]);
       expect(await contract.read.isSettedTokenURI([tokenId])).to.equal(true);
       // NOTE: whitelist is not set
-      expect(await contract.read.whitelistList([tokenId])).to.equal(zeroAddress);
+      expect(await contract.read.whitelistList([tokenId])).to.equal(
+        zeroAddress
+      );
 
       // execute .addWhitelist
-      await contract.write.addWhitelist([otherAccount.account.address, tokenId]);
-      expect((await contract.read.whitelistList([tokenId])).toLowerCase()).to.equal(otherAccount.account.address.toLowerCase());
+      await contract.write.addWhitelist([
+        otherAccount.account.address,
+        tokenId,
+      ]);
+      expect(
+        (await contract.read.whitelistList([tokenId])).toLowerCase()
+      ).to.equal(otherAccount.account.address.toLowerCase());
 
       // execute .reveal & check tokenURI
       expect(await contract.read.isRevealed()).to.equal(false);
@@ -183,25 +203,51 @@ describe("WhitelistNFT2", function () {
 
       // execute .mint
       await contract.write.mintByOwner([otherAccount.account.address, tokenId]);
-      expect((await contract.read.ownerOf([tokenId])).toLowerCase()).to.equal(otherAccount.account.address.toLowerCase());
-      expect(await contract.read.tokenURI([tokenId])).to.equal(BASE_URI + tokenFilepath);
+      expect((await contract.read.ownerOf([tokenId])).toLowerCase()).to.equal(
+        otherAccount.account.address.toLowerCase()
+      );
+      expect(await contract.read.tokenURI([tokenId])).to.equal(
+        BASE_URI + tokenFilepath
+      );
     });
 
-    it("addToken", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [otherAccount] = otherAccounts
+    it("getTokenIdList", async function () {
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [otherAccount] = otherAccounts;
 
       // by not owner
       await expectRevert(
-        () => contract.write.addToken([1n, "sample.json"], {
-          account: otherAccount.account
-        }),
+        () =>
+          contract.read.getTokenIdList({
+            account: otherAccount.account,
+          }),
         "OwnableUnauthorizedAccount"
-      )
+      );
 
       // by owner
-      await contract.write.addToken([1n, "1.json"], { account: owner.account })
-      await contract.write.addToken([2n, "2.json"], { account: owner.account })
+      expect(await contract.read.getTokenIdList()).to.deep.equal([]);
+    });
+
+    it("addToken", async function () {
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [otherAccount] = otherAccounts;
+
+      // by not owner
+      await expectRevert(
+        () =>
+          contract.write.addToken([1n, "sample.json"], {
+            account: otherAccount.account,
+          }),
+        "OwnableUnauthorizedAccount"
+      );
+
+      // by owner
+      await contract.write.addToken([1n, "1.json"], { account: owner.account });
+      await contract.write.addToken([2n, "2.json"], { account: owner.account });
       expect(await contract.read.getTokenIdList()).to.deep.equal([1n, 2n]);
       expect(await contract.read.isSettedTokenURI([1n])).to.equal(true);
       expect(await contract.read.isSettedTokenURI([2n])).to.equal(true);
@@ -211,68 +257,93 @@ describe("WhitelistNFT2", function () {
     });
 
     it("addWhitelist", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [other1, other2] = otherAccounts
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1, other2] = otherAccounts;
 
       // by not owner
       await expectRevert(
-        () => contract.write.addWhitelist([other1.account.address, 1n], {
-          account: other1.account
-        }),
+        () =>
+          contract.write.addWhitelist([other1.account.address, 1n], {
+            account: other1.account,
+          }),
         "OwnableUnauthorizedAccount"
-      )
+      );
 
       // by owner
-      await contract.write.addWhitelist([other1.account.address, 1n], { account: owner.account })
-      await contract.write.addWhitelist([other2.account.address, 2n], { account: owner.account })
-      expect((await contract.read.whitelistList([1n])).toLowerCase()).to.equal(other1.account.address.toLowerCase());
-      expect((await contract.read.whitelistList([2n])).toLowerCase()).to.equal(other2.account.address.toLowerCase());
-      expect((await contract.read.whitelistList([3n])).toLowerCase()).to.equal(zeroAddress);
+      await contract.write.addWhitelist([other1.account.address, 1n], {
+        account: owner.account,
+      });
+      await contract.write.addWhitelist([other2.account.address, 2n], {
+        account: owner.account,
+      });
+      expect((await contract.read.whitelistList([1n])).toLowerCase()).to.equal(
+        other1.account.address.toLowerCase()
+      );
+      expect((await contract.read.whitelistList([2n])).toLowerCase()).to.equal(
+        other2.account.address.toLowerCase()
+      );
+      expect((await contract.read.whitelistList([3n])).toLowerCase()).to.equal(
+        zeroAddress
+      );
       expect(await contract.read.getTokenIdList()).to.deep.equal([]);
       expect(await contract.read.isSettedTokenURI([1n])).to.equal(false);
       expect(await contract.read.isSettedTokenURI([2n])).to.equal(false);
       expect(await contract.read.isSettedTokenURI([3n])).to.equal(false);
-    })
+    });
 
     it("reveal", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [other1, other2] = otherAccounts
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1, other2] = otherAccounts;
       expect(await contract.read.isRevealed()).to.equal(false);
 
       // by not owner
       await expectRevert(
         () => contract.write.reveal({ account: other1.account }),
         "OwnableUnauthorizedAccount"
-      )
+      );
 
       // by owner
-      await contract.write.reveal({ account: owner.account })
+      await contract.write.reveal({ account: owner.account });
       expect(await contract.read.isRevealed()).to.equal(true);
-    })
+    });
 
     it("mintByOwner", async function () {
-      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
-      const [other1, other2] = otherAccounts
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
+      const [other1, other2] = otherAccounts;
 
       // by not owner
       await expectRevert(
-        () => contract.write.mintByOwner([other1.account.address, 1n], {
-          account: other2.account
-        }),
+        () =>
+          contract.write.mintByOwner([other1.account.address, 1n], {
+            account: other2.account,
+          }),
         "OwnableUnauthorizedAccount"
-      )
+      );
 
       // by owner
-      await contract.write.addToken([1n, "1.json"], { account: owner.account })
-      await contract.write.addToken([2n, "2.json"], { account: owner.account })
-      await contract.write.mintByOwner([other1.account.address, 1n], { account: owner.account })
-      await contract.write.mintByOwner([other2.account.address, 2n], { account: owner.account })
-      await contract.write.reveal()
-      expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(other1.account.address.toLowerCase());
+      await contract.write.addToken([1n, "1.json"], { account: owner.account });
+      await contract.write.addToken([2n, "2.json"], { account: owner.account });
+      await contract.write.mintByOwner([other1.account.address, 1n], {
+        account: owner.account,
+      });
+      await contract.write.mintByOwner([other2.account.address, 2n], {
+        account: owner.account,
+      });
+      await contract.write.reveal();
+      expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(
+        other1.account.address.toLowerCase()
+      );
       expect(await contract.read.tokenURI([1n])).to.equal(BASE_URI + "1.json");
-      expect((await contract.read.ownerOf([2n])).toLowerCase()).to.equal(other2.account.address.toLowerCase());
+      expect((await contract.read.ownerOf([2n])).toLowerCase()).to.equal(
+        other2.account.address.toLowerCase()
+      );
       expect(await contract.read.tokenURI([2n])).to.equal(BASE_URI + "2.json");
-    })
+    });
   });
 });
-

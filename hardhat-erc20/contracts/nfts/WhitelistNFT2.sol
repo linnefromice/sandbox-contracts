@@ -60,28 +60,62 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
         return revealedBaseURI;
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override returns (string memory) {
         if (isRevealed) {
             return super.tokenURI(tokenId);
         }
         return hiddenURI;
     }
 
-    // NOTE: for debug
-    function getTokenIdList() public view returns (uint256[] memory) {
+    // functions to manage token
+    function getTokenIdList()
+        public
+        view
+        virtual
+        onlyOwner
+        returns (uint256[] memory)
+    {
         return tokenIdList;
     }
 
-    // functions to manage token
+    //// function to register token/whitelist
     function addToken(uint256 tokenId, string memory uri) public onlyOwner {
+        _addToken(tokenId, uri);
+    }
+    function addWhitelist(address user, uint256 tokenId) public onlyOwner {
+        _addWhitelist(user, tokenId);
+    }
+    struct TokenWithReceiver {
+        uint256 tokenId;
+        string uri;
+        address user;
+    }
+    ////// NOTE: use this function or above functions in production
+    function addTokenWithReceiver(
+        TokenWithReceiver memory data
+    ) public onlyOwner {
+        _addTokenWithReceiver(data);
+    }
+
+    function reveal() public onlyOwner {
+        _setIsRevealed(true);
+    }
+
+    function _addToken(uint256 tokenId, string memory uri) internal {
         _setTokenURI(tokenId, uri);
         tokenIdList.push(tokenId);
         isSettedTokenURI[tokenId] = true;
     }
-    function addWhitelist(address user, uint256 tokenId) public onlyOwner {
+    function _addWhitelist(address user, uint256 tokenId) internal {
         whitelistList[tokenId] = user;
     }
-    function reveal() public onlyOwner {
-        isRevealed = true;
+    function _addTokenWithReceiver(TokenWithReceiver memory data) internal {
+        _addToken(data.tokenId, data.uri);
+        _addWhitelist(data.user, data.tokenId);
+    }
+    function _setIsRevealed(bool _isRevealed) internal {
+        isRevealed = _isRevealed;
     }
 }
