@@ -25,7 +25,7 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
     constructor(
         string memory _revealedBaseURI,
         string memory _hiddenURI
-    ) ERC721("WhitelistNFT", "WHITELIST-NFT") Ownable(msg.sender) {
+    ) ERC721("WhitelistNFT2", "WHITELIST-NFT-2") Ownable(msg.sender) {
         revealedBaseURI = _revealedBaseURI;
         hiddenURI = _hiddenURI;
     }
@@ -44,7 +44,7 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
         _executeMint(to, tokenId);
     }
     function _executeMint(address to, uint256 tokenId) internal {
-        if (ownerOf(tokenId) != address(0)) {
+        if (_ownerOf(tokenId) != address(0)) {
             revert AlreadyMinted();
         }
         if (!isSettedTokenURI[tokenId]) {
@@ -65,6 +65,11 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
             return super.tokenURI(tokenId);
         }
         return hiddenURI;
+    }
+
+    // NOTE: for debug
+    function getTokenIdList() public view returns (uint256[] memory) {
+        return tokenIdList;
     }
 
     // functions to manage token
