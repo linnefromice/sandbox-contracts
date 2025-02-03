@@ -1,0 +1,13 @@
+{
+  "editor.formatOnSave": true,
+  "typescript.preferences.quoteStyle": "double",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.ts": "always",
+    "source.organizeImports": "always"
+  },
+  "typescript.preferences.organizeImports": {
+    "scope": "all",
+    "sortImports": true,
+    "removeUnused": true
+  }
+}
