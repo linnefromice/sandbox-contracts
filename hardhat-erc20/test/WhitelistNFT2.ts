@@ -28,7 +28,7 @@ describe("WhitelistNFT2", function () {
 
     const contract = await hre.viem.deployContract(
       "WhitelistNFT2",
-      [BASE_URI, HIDDEN_URI],
+      ["Whitelist NFT 2", "WHITELIST-NFT-2", BASE_URI, HIDDEN_URI],
       {
         // value: lockedAmount,
       }
@@ -54,7 +54,7 @@ describe("WhitelistNFT2", function () {
         contract.read.hiddenURI(),
         contract.read.isRevealed(),
       ]);
-    expect(name).to.equal("WhitelistNFT2");
+    expect(name).to.equal("Whitelist NFT 2");
     expect(symbol).to.equal("WHITELIST-NFT-2");
     expect(revealedBaseURI).to.equal(BASE_URI);
     expect(hiddenURI).to.equal(HIDDEN_URI);

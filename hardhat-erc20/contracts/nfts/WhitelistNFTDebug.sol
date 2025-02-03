@@ -7,6 +7,8 @@ import "./WhitelistNFT2.sol";
 contract WhitelistNFTDebug is WhitelistNFT2 {
     constructor()
         WhitelistNFT2(
+            "Whitelist NFT Debug",
+            "WHITELIST-NFT-DEBUG",
             "https://raw.githubusercontent.com/linnefromice/sandbox-contracts/refs/heads/main/hardhat-erc20/resources/metadata/",
             "https://raw.githubusercontent.com/linnefromice/sandbox-contracts/refs/heads/main/hardhat-erc20/resources/metadata/hidden.json"
         )

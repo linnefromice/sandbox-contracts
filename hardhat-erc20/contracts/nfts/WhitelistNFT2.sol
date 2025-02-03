@@ -23,9 +23,11 @@ contract WhitelistNFT2 is ERC721URIStorage, Ownable {
     // bool public isExpired = false;
 
     constructor(
+        string memory _name,
+        string memory _symbol,
         string memory _revealedBaseURI,
         string memory _hiddenURI
-    ) ERC721("WhitelistNFT2", "WHITELIST-NFT-2") Ownable(msg.sender) {
+    ) ERC721(_name, _symbol) Ownable(msg.sender) {
         revealedBaseURI = _revealedBaseURI;
         hiddenURI = _hiddenURI;
     }
