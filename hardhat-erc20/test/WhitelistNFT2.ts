@@ -99,6 +99,51 @@ describe("WhitelistNFT2", function () {
       expect(await contract.read.tokenURI([1n])).to.equal(BASE_URI + "1.json");
       expect(await contract.read.tokenURI([2n])).to.equal(BASE_URI + "2.json");
     })
+
+    it("about mint", async function () {
+      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
+      const [other1, other2] = otherAccounts
+
+      await contract.write.addToken([1n, "1.json"], { account: owner.account })
+      await contract.write.addWhitelist([other1.account.address, 1n], { account: owner.account })
+      await contract.write.mint([1n], { account: other1.account })
+
+      await expectRevert(
+        () => contract.write.mint([1n], { account: other1.account }),
+        "AlreadyMinted"
+      )
+    })
+
+    it("about addToken", async function () {
+      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
+      const [other1] = otherAccounts
+
+      await expectRevert(
+        () => contract.write.mintByOwner([other1.account.address, 1n], { account: owner.account }),
+        "NotInitializedToken"
+      )
+    })
+
+    it("about whitelist", async function () {
+      const { contract, owner, otherAccounts } = await loadFixture(deployWithFixture);
+      const [other1, other2] = otherAccounts
+      await contract.write.addToken([1n, "1.json"], { account: owner.account })
+
+      // not whitelisted
+      await expectRevert(
+        () => contract.write.mint([1n], { account: other1.account }),
+        "NotWhitelisted"
+      )
+      // whitelisted, but not receiver
+      await contract.write.addWhitelist([other1.account.address, 1n], { account: owner.account })
+      await expectRevert(
+        () => contract.write.mint([1n], { account: other2.account }),
+        "NotReceiver"
+      )
+
+      await contract.write.mint([1n], { account: other1.account })
+      expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(other1.account.address.toLowerCase());
+    })
   })
 
   describe("manage-token", function () {
