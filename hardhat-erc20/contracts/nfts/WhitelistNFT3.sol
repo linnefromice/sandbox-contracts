@@ -13,7 +13,6 @@ contract WhitelistNFT3 is ERC721URIStorage, Ownable {
     error NotInitializedToken(uint256 tokenId);
     error AlreadyWhitelisted(address user);
     error NotWhitelisted(address user);
-    error NotReceiver();
     error AlreadyMinted();
     error MintExpired();
 

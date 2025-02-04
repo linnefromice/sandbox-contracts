@@ -2,7 +2,6 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
-import { zeroAddress } from "viem";
 // import abi from "../artifacts/contracts/nfts/WhitelistNFT2.sol/WhitelistNFT2.json";
 // const CONTRACT_INTERFACE = new ethers.Interface(abi["abi"]);
 
@@ -91,8 +90,8 @@ describe("WhitelistNFT3", function () {
       });
 
       // mint
-      await contract.write.mint([1n], { account: other1.account });
-      await contract.write.mint([2n], { account: other2.account });
+      await contract.write.mint({ account: other1.account });
+      await contract.write.mint({ account: other2.account });
       expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(
         other1.account.address.toLowerCase()
       );
@@ -111,16 +110,16 @@ describe("WhitelistNFT3", function () {
       const { contract, owner, otherAccounts } = await loadFixture(
         deployWithFixture
       );
-      const [other1, other2] = otherAccounts;
+      const [other1] = otherAccounts;
 
       await contract.write.addToken([1n, "1.json"], { account: owner.account });
       await contract.write.addWhitelist([other1.account.address, 1n], {
         account: owner.account,
       });
-      await contract.write.mint([1n], { account: other1.account });
+      await contract.write.mint({ account: other1.account });
 
       await expectRevert(
-        () => contract.write.mint([1n], { account: other1.account }),
+        () => contract.write.mint({ account: other1.account }),
         "AlreadyMinted"
       );
     });
@@ -149,19 +148,27 @@ describe("WhitelistNFT3", function () {
 
       // not whitelisted
       await expectRevert(
-        () => contract.write.mint([1n], { account: other1.account }),
+        () => contract.write.mint({ account: other1.account }),
         "NotWhitelisted"
       );
-      // whitelisted, but not receiver
+      // receiver is whitelisted, but executed by not receiver
       await contract.write.addWhitelist([other1.account.address, 1n], {
         account: owner.account,
       });
       await expectRevert(
-        () => contract.write.mint([1n], { account: other2.account }),
-        "NotReceiver"
+        () => contract.write.mint({ account: other2.account }),
+        "NotWhitelisted"
+      );
+      // check 1tokenId per 1address
+      await expectRevert(
+        () =>
+          contract.write.addWhitelist([other1.account.address, 1n], {
+            account: owner.account,
+          }),
+        "AlreadyWhitelisted"
       );
 
-      await contract.write.mint([1n], { account: other1.account });
+      await contract.write.mint({ account: other1.account });
       expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(
         other1.account.address.toLowerCase()
       );
@@ -171,23 +178,19 @@ describe("WhitelistNFT3", function () {
       const { contract, owner, otherAccounts } = await loadFixture(
         deployWithFixture
       );
-      const [other1] = otherAccounts;
+      const [other1, other2] = otherAccounts;
 
       await contract.write.addTokenWithReceiver(
         [{ tokenId: 1n, uri: "1.json", user: other1.account.address }],
         { account: owner.account }
       );
-      await contract.write.addTokenWithReceiver(
-        [{ tokenId: 2n, uri: "2.json", user: other1.account.address }],
-        { account: owner.account }
-      );
       // before expireMintAction
-      await contract.write.mint([1n], { account: other1.account });
+      await contract.write.mint({ account: other1.account });
       await contract.write.expireMintAction({ account: owner.account });
       expect(await contract.read.isMintExpired()).to.equal(true);
       // after expireMintAction
       await expectRevert(
-        () => contract.write.mint([2n], { account: other1.account }),
+        () => contract.write.mint({ account: other1.account }),
         "MintExpired"
       );
     });
@@ -204,10 +207,6 @@ describe("WhitelistNFT3", function () {
       await contract.write.addToken([tokenId, tokenFilepath]);
       expect(await contract.read.getTokenIdList()).to.deep.equal([tokenId]);
       expect(await contract.read.isSettedTokenURI([tokenId])).to.equal(true);
-      // NOTE: whitelist is not set
-      expect(await contract.read.whitelistList([tokenId])).to.equal(
-        zeroAddress
-      );
 
       // execute .addWhitelist
       await contract.write.addWhitelist([
@@ -215,8 +214,8 @@ describe("WhitelistNFT3", function () {
         tokenId,
       ]);
       expect(
-        (await contract.read.whitelistList([tokenId])).toLowerCase()
-      ).to.equal(otherAccount.account.address.toLowerCase());
+        await contract.read.whitelistList([otherAccount.account.address])
+      ).to.equal(tokenId);
 
       // execute .reveal & check tokenURI
       expect(await contract.read.isRevealed()).to.equal(false);
@@ -286,8 +285,6 @@ describe("WhitelistNFT3", function () {
       expect(await contract.read.isSettedTokenURI([1n])).to.equal(true);
       expect(await contract.read.isSettedTokenURI([2n])).to.equal(true);
       expect(await contract.read.isSettedTokenURI([3n])).to.equal(false);
-      expect(await contract.read.whitelistList([1n])).to.equal(zeroAddress);
-      expect(await contract.read.whitelistList([2n])).to.equal(zeroAddress);
     });
 
     it("addWhitelist", async function () {
@@ -312,15 +309,12 @@ describe("WhitelistNFT3", function () {
       await contract.write.addWhitelist([other2.account.address, 2n], {
         account: owner.account,
       });
-      expect((await contract.read.whitelistList([1n])).toLowerCase()).to.equal(
-        other1.account.address.toLowerCase()
-      );
-      expect((await contract.read.whitelistList([2n])).toLowerCase()).to.equal(
-        other2.account.address.toLowerCase()
-      );
-      expect((await contract.read.whitelistList([3n])).toLowerCase()).to.equal(
-        zeroAddress
-      );
+      expect(
+        await contract.read.whitelistList([other1.account.address])
+      ).to.equal(1n);
+      expect(
+        await contract.read.whitelistList([other2.account.address])
+      ).to.equal(2n);
       expect(await contract.read.getTokenIdList()).to.deep.equal([]);
       expect(await contract.read.isSettedTokenURI([1n])).to.equal(false);
       expect(await contract.read.isSettedTokenURI([2n])).to.equal(false);
@@ -331,7 +325,7 @@ describe("WhitelistNFT3", function () {
       const { contract, owner, otherAccounts } = await loadFixture(
         deployWithFixture
       );
-      const [other1, other2] = otherAccounts;
+      const [other1] = otherAccounts;
       expect(await contract.read.isRevealed()).to.equal(false);
 
       // by not owner
