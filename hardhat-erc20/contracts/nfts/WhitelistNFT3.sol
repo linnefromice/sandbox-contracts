@@ -5,15 +5,20 @@ pragma solidity ^0.8.28;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+// NOTE: update WhitelistNFT2.sol to WhitelistNFT3.sol
+// - 1 address has 1 tokenId
+//   - whitelistList is mapping(address => uint256)
+
 contract WhitelistNFT3 is ERC721URIStorage, Ownable {
     error NotInitializedToken(uint256 tokenId);
-    error NotWhitelisted(uint256 tokenId);
+    error AlreadyWhitelisted(address user);
+    error NotWhitelisted(address user);
     error NotReceiver();
     error AlreadyMinted();
     error MintExpired();
 
     uint256[] public tokenIdList;
-    mapping(uint256 => address) public whitelistList;
+    mapping(address => uint256) public whitelistList;
     mapping(uint256 => bool) public isSettedTokenURI;
 
     bool public isRevealed = false;
@@ -31,13 +36,11 @@ contract WhitelistNFT3 is ERC721URIStorage, Ownable {
         hiddenURI = _hiddenURI;
     }
 
-    function mint(uint256 tokenId) public {
-        address receiver = whitelistList[tokenId];
-        if (receiver == address(0)) {
-            revert NotWhitelisted(tokenId);
-        }
-        if (receiver != msg.sender) {
-            revert NotReceiver();
+    function mint() public {
+        address receiver = msg.sender;
+        uint256 tokenId = whitelistList[receiver];
+        if (tokenId == 0) {
+            revert NotWhitelisted(receiver);
         }
         if (isMintExpired) {
             revert MintExpired();
@@ -116,7 +119,10 @@ contract WhitelistNFT3 is ERC721URIStorage, Ownable {
         isSettedTokenURI[tokenId] = true;
     }
     function _addWhitelist(address user, uint256 tokenId) internal {
-        whitelistList[tokenId] = user;
+        if (whitelistList[user] != 0) {
+            revert AlreadyWhitelisted(user);
+        }
+        whitelistList[user] = tokenId;
     }
     function _addTokenWithReceiver(TokenWithReceiver memory data) internal {
         _addToken(data.tokenId, data.uri);
