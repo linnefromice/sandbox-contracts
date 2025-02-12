@@ -15,6 +15,7 @@ contract WhitelistNFT3 is ERC721URIStorage, Ownable {
     error NotWhitelisted(address user);
     error AlreadyMinted();
     error MintExpired();
+    error NotRecoverable();
 
     uint256[] public tokenIdList;
     mapping(address => uint256) public whitelistList;
@@ -46,8 +47,24 @@ contract WhitelistNFT3 is ERC721URIStorage, Ownable {
         }
         _executeMint(receiver, tokenId);
     }
-    function mintByOwner(address to, uint256 tokenId) public onlyOwner {
-        _executeMint(to, tokenId);
+
+    struct RecoverInfo {
+        address to;
+        uint256 tokenId;
+    }
+    function recoverByOwner(RecoverInfo memory data) public onlyOwner {
+        if (!isMintExpired) {
+            revert NotRecoverable();
+        }
+        _executeMint(data.to, data.tokenId);
+    }
+    function bulkRecoverByOwner(RecoverInfo[] memory data) public onlyOwner {
+        if (!isMintExpired) {
+            revert NotRecoverable();
+        }
+        for (uint256 i = 0; i < data.length; i++) {
+            _executeMint(data[i].to, data[i].tokenId);
+        }
     }
     function _executeMint(address to, uint256 tokenId) internal {
         if (_ownerOf(tokenId) != address(0)) {

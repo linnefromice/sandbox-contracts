@@ -145,10 +145,17 @@ describe("WhitelistNFT3", function () {
       );
       const [other1] = otherAccounts;
 
+      await contract.write.addWhitelist(
+        [{ user: other1.account.address, tokenId: 1n }],
+        {
+          account: owner.account,
+        }
+      );
+
       await expectRevert(
         () =>
-          contract.write.mintByOwner([other1.account.address, 1n], {
-            account: owner.account,
+          contract.write.mint({
+            account: other1.account,
           }),
         "NotInitializedToken"
       );
@@ -221,7 +228,9 @@ describe("WhitelistNFT3", function () {
 
   describe("manage-token", function () {
     it("scenario", async function () {
-      const { contract, otherAccounts } = await loadFixture(deployWithFixture);
+      const { contract, owner, otherAccounts } = await loadFixture(
+        deployWithFixture
+      );
       const [otherAccount] = otherAccounts;
 
       // execute .addToken
@@ -232,12 +241,17 @@ describe("WhitelistNFT3", function () {
       expect(await contract.read.isSettedTokenURI([tokenId])).to.equal(true);
 
       // execute .addWhitelist
-      await contract.write.addWhitelist([
+      await contract.write.addWhitelist(
+        [
+          {
+            user: otherAccount.account.address,
+            tokenId,
+          },
+        ],
         {
-          user: otherAccount.account.address,
-          tokenId,
-        },
-      ]);
+          account: owner.account,
+        }
+      );
       expect(
         await contract.read.whitelistList([otherAccount.account.address])
       ).to.equal(tokenId);
@@ -260,7 +274,18 @@ describe("WhitelistNFT3", function () {
       //     .revertedWithCustomError({ interface: CONTRACT_INTERFACE }, "ERC721NonexistentToken");
 
       // execute .mint
-      await contract.write.mintByOwner([otherAccount.account.address, tokenId]);
+      await contract.write.expireMintAction({ account: owner.account });
+      await contract.write.recoverByOwner(
+        [
+          {
+            to: otherAccount.account.address,
+            tokenId,
+          },
+        ],
+        {
+          account: owner.account,
+        }
+      );
       expect((await contract.read.ownerOf([tokenId])).toLowerCase()).to.equal(
         otherAccount.account.address.toLowerCase()
       );
@@ -409,7 +434,7 @@ describe("WhitelistNFT3", function () {
       expect(await contract.read.isMintExpired()).to.equal(true);
     });
 
-    it("mintByOwner", async function () {
+    it("recoverByOwner/bulkRecoverByOwner", async function () {
       const { contract, owner, otherAccounts } = await loadFixture(
         deployWithFixture
       );
@@ -418,9 +443,34 @@ describe("WhitelistNFT3", function () {
       // by not owner
       await expectRevert(
         () =>
-          contract.write.mintByOwner([other1.account.address, 1n], {
-            account: other2.account,
-          }),
+          contract.write.recoverByOwner(
+            [
+              {
+                to: other1.account.address,
+                tokenId: 1n,
+              },
+            ],
+            {
+              account: other2.account,
+            }
+          ),
+        "OwnableUnauthorizedAccount"
+      );
+      await expectRevert(
+        () =>
+          contract.write.bulkRecoverByOwner(
+            [
+              [
+                {
+                  to: other1.account.address,
+                  tokenId: 1n,
+                },
+              ],
+            ],
+            {
+              account: other2.account,
+            }
+          ),
         "OwnableUnauthorizedAccount"
       );
 
@@ -430,25 +480,68 @@ describe("WhitelistNFT3", function () {
           [
             { tokenId: 1n, uri: "1.json" },
             { tokenId: 2n, uri: "2.json" },
+            { tokenId: 3n, uri: "3.json" },
           ],
         ],
         { account: owner.account }
       );
-      await contract.write.mintByOwner([other1.account.address, 1n], {
-        account: owner.account,
-      });
-      await contract.write.mintByOwner([other2.account.address, 2n], {
-        account: owner.account,
-      });
-      await contract.write.reveal();
+      await expectRevert(
+        () =>
+          contract.write.recoverByOwner(
+            [
+              {
+                to: other1.account.address,
+                tokenId: 1n,
+              },
+            ],
+            { account: owner.account }
+          ),
+        "NotRecoverable"
+      );
+
+      await contract.write.expireMintAction({ account: owner.account });
+      await contract.write.recoverByOwner(
+        [
+          {
+            to: other1.account.address,
+            tokenId: 1n,
+          },
+        ],
+        { account: owner.account }
+      );
       expect((await contract.read.ownerOf([1n])).toLowerCase()).to.equal(
         other1.account.address.toLowerCase()
       );
-      expect(await contract.read.tokenURI([1n])).to.equal(BASE_URI + "1.json");
+
+      await contract.write.bulkRecoverByOwner(
+        [
+          [
+            {
+              to: other2.account.address,
+              tokenId: 2n,
+            },
+            {
+              to: owner.account.address,
+              tokenId: 3n,
+            },
+          ],
+        ],
+        { account: owner.account }
+      );
       expect((await contract.read.ownerOf([2n])).toLowerCase()).to.equal(
         other2.account.address.toLowerCase()
       );
+      expect((await contract.read.ownerOf([3n])).toLowerCase()).to.equal(
+        owner.account.address.toLowerCase()
+      );
+
+      expect(await contract.read.tokenURI([1n])).to.equal(HIDDEN_URI);
+      expect(await contract.read.tokenURI([2n])).to.equal(HIDDEN_URI);
+      expect(await contract.read.tokenURI([3n])).to.equal(HIDDEN_URI);
+      await contract.write.reveal({ account: owner.account });
+      expect(await contract.read.tokenURI([1n])).to.equal(BASE_URI + "1.json");
       expect(await contract.read.tokenURI([2n])).to.equal(BASE_URI + "2.json");
+      expect(await contract.read.tokenURI([3n])).to.equal(BASE_URI + "3.json");
     });
   });
 });
