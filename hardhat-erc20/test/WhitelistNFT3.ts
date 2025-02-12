@@ -80,14 +80,24 @@ describe("WhitelistNFT3", function () {
       const [other1, other2] = otherAccounts;
 
       // add token
-      await contract.write.addToken([1n, "1.json"], { account: owner.account });
-      await contract.write.addToken([2n, "2.json"], { account: owner.account });
-      await contract.write.addWhitelist([other1.account.address, 1n], {
-        account: owner.account,
-      });
-      await contract.write.addWhitelist([other2.account.address, 2n], {
-        account: owner.account,
-      });
+      await contract.write.bulkAddToken(
+        [
+          [
+            { tokenId: 1n, uri: "1.json" },
+            { tokenId: 2n, uri: "2.json" },
+          ],
+        ],
+        { account: owner.account }
+      );
+      await contract.write.bulkAddWhitelist(
+        [
+          [
+            { user: other1.account.address, tokenId: 1n },
+            { user: other2.account.address, tokenId: 2n },
+          ],
+        ],
+        { account: owner.account }
+      );
 
       // mint
       await contract.write.mint({ account: other1.account });
@@ -112,10 +122,15 @@ describe("WhitelistNFT3", function () {
       );
       const [other1] = otherAccounts;
 
-      await contract.write.addToken([1n, "1.json"], { account: owner.account });
-      await contract.write.addWhitelist([other1.account.address, 1n], {
+      await contract.write.addToken([{ tokenId: 1n, uri: "1.json" }], {
         account: owner.account,
       });
+      await contract.write.addWhitelist(
+        [{ user: other1.account.address, tokenId: 1n }],
+        {
+          account: owner.account,
+        }
+      );
       await contract.write.mint({ account: other1.account });
 
       await expectRevert(
@@ -144,7 +159,9 @@ describe("WhitelistNFT3", function () {
         deployWithFixture
       );
       const [other1, other2] = otherAccounts;
-      await contract.write.addToken([1n, "1.json"], { account: owner.account });
+      await contract.write.addToken([{ tokenId: 1n, uri: "1.json" }], {
+        account: owner.account,
+      });
 
       // not whitelisted
       await expectRevert(
@@ -152,9 +169,12 @@ describe("WhitelistNFT3", function () {
         "NotWhitelisted"
       );
       // receiver is whitelisted, but executed by not receiver
-      await contract.write.addWhitelist([other1.account.address, 1n], {
-        account: owner.account,
-      });
+      await contract.write.addWhitelist(
+        [{ user: other1.account.address, tokenId: 1n }],
+        {
+          account: owner.account,
+        }
+      );
       await expectRevert(
         () => contract.write.mint({ account: other2.account }),
         "NotWhitelisted"
@@ -162,9 +182,12 @@ describe("WhitelistNFT3", function () {
       // check 1tokenId per 1address
       await expectRevert(
         () =>
-          contract.write.addWhitelist([other1.account.address, 1n], {
-            account: owner.account,
-          }),
+          contract.write.addWhitelist(
+            [{ user: other1.account.address, tokenId: 1n }],
+            {
+              account: owner.account,
+            }
+          ),
         "AlreadyWhitelisted"
       );
 
@@ -204,14 +227,16 @@ describe("WhitelistNFT3", function () {
       // execute .addToken
       const tokenId = 1n;
       const tokenFilepath = "1.json";
-      await contract.write.addToken([tokenId, tokenFilepath]);
+      await contract.write.addToken([{ tokenId, uri: tokenFilepath }]);
       expect(await contract.read.getTokenIdList()).to.deep.equal([tokenId]);
       expect(await contract.read.isSettedTokenURI([tokenId])).to.equal(true);
 
       // execute .addWhitelist
       await contract.write.addWhitelist([
-        otherAccount.account.address,
-        tokenId,
+        {
+          user: otherAccount.account.address,
+          tokenId,
+        },
       ]);
       expect(
         await contract.read.whitelistList([otherAccount.account.address])
@@ -272,15 +297,19 @@ describe("WhitelistNFT3", function () {
       // by not owner
       await expectRevert(
         () =>
-          contract.write.addToken([1n, "sample.json"], {
+          contract.write.addToken([{ tokenId: 1n, uri: "sample.json" }], {
             account: otherAccount.account,
           }),
         "OwnableUnauthorizedAccount"
       );
 
       // by owner
-      await contract.write.addToken([1n, "1.json"], { account: owner.account });
-      await contract.write.addToken([2n, "2.json"], { account: owner.account });
+      await contract.write.addToken([{ tokenId: 1n, uri: "1.json" }], {
+        account: owner.account,
+      });
+      await contract.write.addToken([{ tokenId: 2n, uri: "2.json" }], {
+        account: owner.account,
+      });
       expect(await contract.read.getTokenIdList()).to.deep.equal([1n, 2n]);
       expect(await contract.read.isSettedTokenURI([1n])).to.equal(true);
       expect(await contract.read.isSettedTokenURI([2n])).to.equal(true);
@@ -296,19 +325,43 @@ describe("WhitelistNFT3", function () {
       // by not owner
       await expectRevert(
         () =>
-          contract.write.addWhitelist([other1.account.address, 1n], {
-            account: other1.account,
-          }),
+          contract.write.addWhitelist(
+            [
+              {
+                user: other1.account.address,
+                tokenId: 1n,
+              },
+            ],
+            {
+              account: other1.account,
+            }
+          ),
         "OwnableUnauthorizedAccount"
       );
 
       // by owner
-      await contract.write.addWhitelist([other1.account.address, 1n], {
-        account: owner.account,
-      });
-      await contract.write.addWhitelist([other2.account.address, 2n], {
-        account: owner.account,
-      });
+      await contract.write.addWhitelist(
+        [
+          {
+            user: other1.account.address,
+            tokenId: 1n,
+          },
+        ],
+        {
+          account: owner.account,
+        }
+      );
+      await contract.write.addWhitelist(
+        [
+          {
+            user: other2.account.address,
+            tokenId: 2n,
+          },
+        ],
+        {
+          account: owner.account,
+        }
+      );
       expect(
         await contract.read.whitelistList([other1.account.address])
       ).to.equal(1n);
@@ -372,8 +425,15 @@ describe("WhitelistNFT3", function () {
       );
 
       // by owner
-      await contract.write.addToken([1n, "1.json"], { account: owner.account });
-      await contract.write.addToken([2n, "2.json"], { account: owner.account });
+      await contract.write.bulkAddToken(
+        [
+          [
+            { tokenId: 1n, uri: "1.json" },
+            { tokenId: 2n, uri: "2.json" },
+          ],
+        ],
+        { account: owner.account }
+      );
       await contract.write.mintByOwner([other1.account.address, 1n], {
         account: owner.account,
       });

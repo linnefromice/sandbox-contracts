@@ -87,12 +87,31 @@ contract WhitelistNFT3 is ERC721URIStorage, Ownable {
     }
 
     //// function to register token/whitelist
-    function addToken(uint256 tokenId, string memory uri) public onlyOwner {
-        _addToken(tokenId, uri);
+    struct TokenInfo {
+        uint256 tokenId;
+        string uri;
     }
-    function addWhitelist(address user, uint256 tokenId) public onlyOwner {
-        _addWhitelist(user, tokenId);
+    function addToken(TokenInfo memory data) public onlyOwner {
+        _addToken(data.tokenId, data.uri);
     }
+    function bulkAddToken(TokenInfo[] memory data) public onlyOwner {
+        for (uint256 i = 0; i < data.length; i++) {
+            _addToken(data[i].tokenId, data[i].uri);
+        }
+    }
+    struct WhitelistInfo {
+        address user;
+        uint256 tokenId;
+    }
+    function addWhitelist(WhitelistInfo memory data) public onlyOwner {
+        _addWhitelist(data.user, data.tokenId);
+    }
+    function bulkAddWhitelist(WhitelistInfo[] memory data) public onlyOwner {
+        for (uint256 i = 0; i < data.length; i++) {
+            _addWhitelist(data[i].user, data[i].tokenId);
+        }
+    }
+
     struct TokenWithReceiver {
         uint256 tokenId;
         string uri;
@@ -103,6 +122,13 @@ contract WhitelistNFT3 is ERC721URIStorage, Ownable {
         TokenWithReceiver memory data
     ) public onlyOwner {
         _addTokenWithReceiver(data);
+    }
+    function bulkAddTokenWithReceiver(
+        TokenWithReceiver[] memory data
+    ) public onlyOwner {
+        for (uint256 i = 0; i < data.length; i++) {
+            _addTokenWithReceiver(data[i]);
+        }
     }
 
     function reveal() public onlyOwner {
