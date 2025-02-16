@@ -14,6 +14,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:nft-debug:sepolia": "hardhat ignition deploy ./ignition/modules/WhitelistNFTDebug.ts --network sepolia --verify",
+    "deploy:nft-debug-2:sepolia": "hardhat ignition deploy ./ignition/modules/WhitelistNFTDebug2.ts --network sepolia --verify",
     "ts-node": "ts-node"
   }
 }

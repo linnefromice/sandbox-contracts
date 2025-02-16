@@ -7,5 +7,6 @@
 
 ```bash
 npm run deploy:nft-debug:sepolia
+npm run deploy:nft-debug-2:sepolia
 # npx hardhat ignition verify chain-11155111
 ```
